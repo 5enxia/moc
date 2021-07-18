@@ -11,19 +11,17 @@ _re_all = re.compile(_p_number + '|' + _p_operator)
 
 def lexer(line):
 	tokens = _re_all.findall(line)
-	print("\tmov rax, {}".format(tokens[0]))
-	operator = None
-	operand = None
-	template = ''
-	for token in tokens[1:]:
+	print(f'\tmov rax, {tokens.pop(0)}')
+
+	while len(tokens) > 0:
+		token = tokens.pop(0)
 		if _re_operator.match(token):
 			if token == '+':
-				template = '\tadd rax, {}'
+				print(f'\tadd rax, {tokens.pop(0)}')
 			elif token == '-':
-				template = '\tsub rax, {}'
-		elif _re_number.match(token):
-			print(template.format(token))
-		
+				print(f'\tsub rax, {tokens.pop(0)}')
+		else:
+			pass
 
 if __name__ == '__main__':
 	argc = len(argv)
