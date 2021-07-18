@@ -17,9 +17,13 @@ def lexer(line):
 		token = tokens.pop(0)
 		if _re_operator.match(token):
 			if token == '+':
-				print(f'\tadd rax, {tokens.pop(0)}')
+				token = tokens.pop(0)
+				if _re_number.match(token):
+					print(f'\tadd rax, {token}')
 			elif token == '-':
-				print(f'\tsub rax, {tokens.pop(0)}')
+				token = tokens.pop(0)
+				if _re_number.match(token):
+					print(f'\tsub rax, {token}')
 		else:
 			pass
 
