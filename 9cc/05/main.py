@@ -1,6 +1,8 @@
 from sys import argv
 import re
-from enum import Enum
+
+from Node import NodeKind, Node
+import Code
 
 _p_number = r'\d+'
 _p_operator = r'[\+\-\*\/]'
@@ -12,58 +14,52 @@ _re_parentheses = re.compile(_p_parentheses)
 _re_all = re.compile(_p_number + '|' + _p_operator + '|' + _p_parentheses)
 
 tokens = []
+token = None
 
-class NodeKind(Enum):
-	ND_ADD = 0 # +
-	ND_SUB = 1 # -
-	ND_MUL = 2 # *
-	ND_DIV = 3 # /
-	ND_NUM = 4 # 整数
-
-class Node(object):
-	@classmethod
-	def new_node(kind: NodeKind, lhs: Node, rhs: Node):
-		return Node(kind, lhs, rhs, None)
-
-	@classmethod
-	def new_node_num(val):
-		return Node(NodeKind.ND_NUM, None, None, val)
-
-	def __init__(self, kind: NodeKind, lhs: Node, rhs: Node, val):
-		self.kind = kind # ノードの型
-		self.lhs = lhs # 左辺
-		self.rhs = rhs # 右辺
-		self.val = val # kindがND_NUMの場合のみ使う
+def consume(target):
+	if tokens == []:
+		return False
+	elif target != tokens[0]:
+		return False
+	else:
+		tokens.pop(0)
+		return True
 
 def expr():
-	token = tokens.pop(0)
-	if token == '+':
-		pass
-	elif token == '-':
-		pass
-	else:
-		pass
+	node = mul()
+	while True:
+		if consume('+'):
+			node = Node.new_node(NodeKind.ND_ADD, node, mul())
+		elif consume('-'):
+			node = Node.new_node(NodeKind.ND_SUB, node, mul())
+		else:
+			return node
 
 def mul():
-	token = tokens.pop(0)
-	if token == '*':
-		pass
-	elif token == '/':
-		pass
-	else:
-		pass
+	node = primary()
+	while True:
+		if consume('*'):
+			node = Node.new_node(NodeKind.ND_MUL, node, primary())
+		elif consume('/'):
+			node = Node.new_node(NodeKind.ND_DIV, node, primary())
+		else:
+			return node
 
 def primary():
-	token = tokens.pop(0)
-	if token == '(': 
-		pass
-	token = tokens.pop(0)
-	if token == ')': 
-		pass
+	if consume('('):
+		node = expr()
+		if consume(')'):
+			return node
+		else:
+			exit(0)
+	elif _re_number.match(tokens[0]):
+		return Node.new_node_num(tokens.pop(0))
+
 
 def lexer(line):
 	tokens = _re_all.findall(line)
-	print(f'\tmov rax, {tokens.pop(0)}')
+	token = tokens.pop(0)
+	print(f'\tmov rax, {token}')
 
 	while len(tokens) > 0:
 		token = tokens.pop(0)
@@ -85,10 +81,15 @@ if __name__ == '__main__':
 		print("引数の個数が正しくありません")
 		exit(1)
 	p = argv[1]
+	tokens = _re_all.findall(p)
+
+	node = expr()
+
 	print(".intel_syntax noprefix")
 	print(".globl main")
 	print("main:")
 
-	lexer(p)
+	Code.generate(node)
 
+	print("\tpop rax")
 	print("\tret")

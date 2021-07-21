@@ -9,11 +9,11 @@ class NodeKind(Enum):
 
 class Node(object):
 	@classmethod
-	def new_node(kind: NodeKind, lhs, rhs ):
-		return (kind, lhs, rhs, None)
+	def new_node(cls, kind: NodeKind, lhs, rhs ):
+		return Node(kind, lhs, rhs, None)
 
 	@classmethod
-	def new_node_num(val):
+	def new_node_num(cls, val):
 		return Node(NodeKind.ND_NUM, None, None, val)
 
 	def __init__(self, kind: NodeKind, lhs, rhs , val):
@@ -21,9 +21,3 @@ class Node(object):
 		self.lhs = lhs # 左辺
 		self.rhs = rhs # 右辺
 		self.val = val # kindがND_NUMの場合のみ使う
-
-a = Node(NodeKind.ND_ADD, None, None, None)
-b = Node.new_node_num(10)
-c  = Node.new_node(NodeKind.ND_SUB,  a, b)
-
-
