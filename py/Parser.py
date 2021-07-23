@@ -1,7 +1,5 @@
 from enum import Enum
 
-import Lexer
-
 class NodeKind(Enum):
 	ADD = 0  # +
 	SUB = 1  # -
@@ -23,35 +21,37 @@ class Node(object):
 
 	@classmethod
 	def new_node_num(cls, val):
-		return Node(None, None, None, val)
+		return Node(NodeKind.NUM, None, None, val)
 
 
-def expr():
-	node = mul()
-	while True:
-		if Lexer.consume('+'):
-			node = Node.new_node(NodeKind.ADD, node, mul())
-		elif Lexer.consume('-'):
-			node = Node.new_node(NodeKind.SUB, node, mul())
-		else:
-			return node
+class Parser(object):
+	def __init__(self, lexer):
+		self.lexer = lexer
 
-	@classmethod
-	def mul(cls):
-		node = Parser.primary()
+	def expr(self):
+		node = self.mul()
 		while True:
-			if Lexer.consume('*'):
-				node = Node.new_node(NodeKind.MUL, node, Perer.primary())
-			elif Lexer.consume('/'):
-				node = Node.new_node(NodeKind.DIV, node, Parser.primary())
+			if self.lexer.consume('+'):
+				node = Node.new_node(NodeKind.ADD, node, self.mul())
+			elif self.lexer.consume('-'):
+				node = Node.new_node(NodeKind.SUB, node, self.mul())
 			else:
 				return node
 
-	@classmethod
-	def primary(cls):
-		if Lexer.consume('('):
-			node = Perser.expr()
-			Lexer.expect(')')
+	def mul(self):
+		node = self.primary()
+		while True:
+			if self.lexer.consume('*'):
+				node = Node.new_node(NodeKind.MUL, node, self.primary())
+			elif self.lexer.consume('/'):
+				node = Node.new_node(NodeKind.DIV, node, self.primary())
+			else:
+				return node
+
+	def primary(self):
+		if self.lexer.consume('('):
+			node = self.expr()
+			self.lexer.expect(')')
 			return node
-		return Node.new_node_num(Lexer.expect_number())
+		return Node.new_node_num(self.lexer.expect_number())
 	

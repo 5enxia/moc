@@ -30,7 +30,11 @@ class Token(object):
 		return tok
 
 class Lexer(object):
-	token = None
+	def __init__(self, line):
+		self.token = Lexer.tokenize(line)
+
+	def __str__(self):
+		return self.token.str 
 
 	@classmethod
 	def tokenize(cls, line):
@@ -49,36 +53,27 @@ class Lexer(object):
 			else:	
 				Lexer._error('Can not tokenize.')
 		
-		Token.new_token(TokenKind.EOF, cur, 'EOF')
+		Token.new_token(TokenKind.EOF, cur, None)
 		return head.next
 
-	@classmethod
-	def _error(cls, msg):
-		print(msg, file=stderr)
-		exit(1)
-
-	@classmethod
-	def consume(cls, op):
-		if Lexer.token.kind != TokenKind.RESERVED or Lexer.token.str != op:
+	def consume(self, op):
+		if self.token.kind != TokenKind.RESERVED or self.token.str != op:
 			return False
-		Lexer.token = Lexer.token.next
+		self.token = self.token.next
 		return True
 	
-	@classmethod
-	def expect(cls, op):
-		if Lexer.token.kind != TokenKind.RESERVED or Lexer.token.str != op:
+	def expect(self, op):
+		if self.token.kind != TokenKind.RESERVED or self.token.str != op:
 			Lexer._error(f'Token is not {op}.')
-		Lexer.token = Lexer.token.next
+		self.token = self.token.next
 	
-	@classmethod
-	def expect_number(cls):
-		if Lexer.token.kind != TokenKind.NUM:
+	def expect_number(self):
+		if self.token.kind != TokenKind.NUM:
 			Lexer._error(f'Token is not number.')
-		val = Lexer.token.val
-		Lexer.token = Lexer.token.next
+		val = self.token.val
+		self.token = self.token.next
 		return val
 	
-	@classmethod
-	def at_eof(cls):
-		return Lexer.token.kind == TokenKind.EOF
+	def at_eof(self):
+		return self.token.kind == TokenKind.EOF
 		

@@ -1,16 +1,17 @@
 from sys import argv
 
-import Code
-import Lexer
+from Lexer import Lexer
+from Parser import Parser
+from Code import Code
 
 def main():
 	argc = len(argv)
 	if argc != 2:
 		exit(1)
 	
-	line = argv[1]
-	token = Lexer.tokenize(line)
-	Code.Lexer.token = Lexer.token
-	Code.write()
+	lexer = Lexer(argv[1])
+	parser = Parser(lexer)
+	code = Code(parser)
+	code.write()
 
 main()

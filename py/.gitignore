@@ -2,4 +2,4 @@
 *.o
 tmp*
 a.out
-__pychche__
+__pycache__/*

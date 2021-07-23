@@ -1,37 +1,42 @@
-from Lexer import Lexer
-from Parser import Parser, NodeKind, Node
+from Parser import NodeKind, Node
 
-def generate(node: Node):
-	if node.kind == NodeKind.NUM:
-		print(f'\tpush {node.val}')
-		return
-	
-	generate(node.lhs)
-	generate(node.rhs)
+class Code(object):
+	def __init__(self, parser):
+		self.parser = parser
 
-	print('\tpop rdi')
-	print('\tpop rax')
+	def write(self):
+		node = self.parser.expr()
 
-	if node.kind == NodeKind.ADD:
-		print('\tadd rax, rdi')
-	elif node.kind == NodeKind.SUB:
-		print('\tsub rax, rdi')
-	elif node.kind == NodeKind.MUL:
-		print('\timul rax, rdi')
-	elif node.kind == NodeKind.DIV:
-		print('\tcqo')
-		print('\tidiv rdi')
-	
-	print('\tpush rax')
+		print('.intel_syntax noprefix')
+		print('.globl main')
+		print('main:')
 
-def write():
-	node = Parser.expr()
+		Code.generate(node)
 
-	print('.intel_syntax noprefix')
-	print('.globl main')
-	print('main:')
+		print('\tpop rax')
+		print('\tret')
 
-	generate(node)
+	@classmethod
+	def generate(cls, node: Node):
+		if node.kind == NodeKind.NUM:
+			print(f'\tpush {node.val}')
+			return
+		
+		Code.generate(node.lhs)
+		Code.generate(node.rhs)
 
-	print('\tpop rax')
-	print('\tret')
+		print('\tpop rdi')
+		print('\tpop rax')
+
+		if node.kind == NodeKind.ADD:
+			print('\tadd rax, rdi')
+		elif node.kind == NodeKind.SUB:
+			print('\tsub rax, rdi')
+		elif node.kind == NodeKind.MUL:
+			print('\timul rax, rdi')
+		elif node.kind == NodeKind.DIV:
+			print('\tcqo')
+			print('\tidiv rdi')
+		
+		print('\tpush rax')
+
