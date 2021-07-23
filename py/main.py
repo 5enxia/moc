@@ -1,7 +1,7 @@
 from sys import argv
 
 import Code
-from Lexer import Lexer
+import Lexer
 
 def main():
 	argc = len(argv)
@@ -10,6 +10,7 @@ def main():
 	
 	line = argv[1]
 	token = Lexer.tokenize(line)
-	Code.write(token)
+	Code.Lexer.token = Lexer.token
+	Code.write()
 
 main()

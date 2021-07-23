@@ -1,19 +1,37 @@
 from Lexer import Lexer
+from Parser import Parser, NodeKind, Node
 
-def write(token):
-	Lexer.token = token
+def generate(node: Node):
+	if node.kind == NodeKind.NUM:
+		print(f'\tpush {node.val}')
+		return
+	
+	generate(node.lhs)
+	generate(node.rhs)
+
+	print('\tpop rdi')
+	print('\tpop rax')
+
+	if node.kind == NodeKind.ADD:
+		print('\tadd rax, rdi')
+	elif node.kind == NodeKind.SUB:
+		print('\tsub rax, rdi')
+	elif node.kind == NodeKind.MUL:
+		print('\timul rax, rdi')
+	elif node.kind == NodeKind.DIV:
+		print('\tcqo')
+		print('\tidiv rdi')
+	
+	print('\tpush rax')
+
+def write():
+	node = Parser.expr()
 
 	print('.intel_syntax noprefix')
 	print('.globl main')
 	print('main:')
-	print(f'\tmov rax, {Lexer.expect_number()}')
 
-	while not Lexer.at_eof():
-		if Lexer.consume('+'):
-			print(f'\tadd rax, {Lexer.expect_number()}')
-			continue
+	generate(node)
 
-		Lexer.expect('-')
-		print(f'\tsub rax, {Lexer.expect_number()}')
-
+	print('\tpop rax')
 	print('\tret')
