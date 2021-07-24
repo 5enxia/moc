@@ -1,11 +1,15 @@
-from enum import Enum
+from enum import Enum, auto
 
 class NodeKind(Enum):
 	ADD = 0  # +
-	SUB = 1  # -
-	MUL = 2  # *
-	DIV = 3  # /
-	NUM = 4  # integer
+	SUB = auto()  # -
+	MUL = auto()  # *
+	DIV = auto()  # /
+	EQ = auto()  #  ==
+	NE = auto()  #  !=
+	LT = auto()  #  <
+	LE = auto()  #  <=
+	NUM = auto()  # integer
 
 
 class Node(object):
@@ -26,9 +30,57 @@ class Node(object):
 
 class Parser(object):
 	def __init__(self, lexer):
+		self.code = []
 		self.lexer = lexer
 
+	# def program(self):
+	# 	while self.lexer.at_eof():
+	# 		self.code.append(stmt())
+	# 	self.code.append(None)
+	
+	# def stmt(self):
+	# 	node = self.expr()
+	# 	self.lexer.expect(';')
+	# 	return node
+
+	# def expr(self):
+	# 	node = self.mul()
+	# 	while True:
+	# 		if self.lexer.consume('+'):
+	# 			node = Node.new_node(NodeKind.ADD, node, self.mul())
+	# 		elif self.lexer.consume('-'):
+	# 			node = Node.new_node(NodeKind.SUB, node, self.mul())
+	# 		else:
+	# 			return node
+
 	def expr(self):
+		return self.equality()
+	
+	def equality(self):
+		node = self.relational()
+		while True:
+			if self.lexer.consume('=='):
+				node = Node.new_node(NodeKind.EQ, node, self.relational())
+			elif self.lexer.consume('!='):
+				node = Node.new_node(NodeKind.NE, node, self.relational())
+			else:
+				return node
+
+	def relational(self):
+		node = self.add()
+		while True:
+			if self.lexer.consume('<'):
+				node = Node.new_node(NodeKind.LT, node, self.add())
+			elif self.lexer.consume('<='):
+				node = Node.new_node(NodeKind.LE, node, self.add())
+			elif self.lexer.consume('>'):
+				node = Node.new_node(NodeKind.LT, self.add(), node)
+			elif self.lexer.consume('>='):
+				node = Node.new_node(NodeKind.LE, self.add(), node)
+			else:
+				return node
+	
+	def add(self):
 		node = self.mul()
 		while True:
 			if self.lexer.consume('+'):

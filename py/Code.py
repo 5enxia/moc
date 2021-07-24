@@ -37,6 +37,22 @@ class Code(object):
 		elif node.kind == NodeKind.DIV:
 			print('\tcqo')
 			print('\tidiv rdi')
+		elif node.kind == NodeKind.EQ:
+			print("\tcmp rax, rdi")
+			print("\tsete al")
+			print("\tmovzb rax, al")
+		elif node.kind == NodeKind.NE:
+			print("\tcmp rax, rdi")
+			print("\tsetne al")
+			print("\tmovzb rax, al")
+		elif node.kind == NodeKind.LT:
+			print("\tcmp rax, rdi")
+			print("\tsetl al")
+			print("\tmovzb rax, al")
+		elif node.kind == NodeKind.LE:
+			print("\tcmp rax, rdi")
+			print("\tsetle al")
+			print("\tmovzb rax, al")
 		
 		print('\tpush rax')
 
