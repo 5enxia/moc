@@ -102,9 +102,9 @@ class Parser(object):
 	
 	def unary(self):
 		if self.lexer.consume('+'):
-			return self.primary()
+			return self.unary()
 		if self.lexer.consume('-'):
-			return Node.new_node(NodeKind.SUB, Node.new_node_num(0), self.primary())
+			return Node.new_node(NodeKind.SUB, Node.new_node_num(0), self.unary())
 		return self.primary()
 
 	def primary(self):
