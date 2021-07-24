@@ -39,14 +39,21 @@ class Parser(object):
 				return node
 
 	def mul(self):
-		node = self.primary()
+		node = self.unary()
 		while True:
 			if self.lexer.consume('*'):
-				node = Node.new_node(NodeKind.MUL, node, self.primary())
+				node = Node.new_node(NodeKind.MUL, node, self.unary())
 			elif self.lexer.consume('/'):
-				node = Node.new_node(NodeKind.DIV, node, self.primary())
+				node = Node.new_node(NodeKind.DIV, node, self.unary())
 			else:
 				return node
+	
+	def unary(self):
+		if self.lexer.consume('+'):
+			return self.primary()
+		if self.lexer.consume('-'):
+			return Node.new_node(NodeKind.SUB, Node.new_node_num(0), self.primary())
+		return self.primary()
 
 	def primary(self):
 		if self.lexer.consume('('):
