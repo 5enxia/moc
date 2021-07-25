@@ -9,6 +9,8 @@ class NodeKind(Enum):
 	NE = auto()  #  !=
 	LT = auto()  #  <
 	LE = auto()  #  <=
+	LVAR = auto() # local variable
+	ASSIGN = auto() # ident
 	NUM = auto()  # integer
 
 
@@ -18,6 +20,7 @@ class Node(object):
 		self.lhs = lhs
 		self.rhs = rhs
 		self.val = val
+		self.offset = None
 
 	@classmethod
 	def new_node(cls, kind, lhs, rhs):
@@ -33,15 +36,15 @@ class Parser(object):
 		self.code = []
 		self.lexer = lexer
 
-	# def program(self):
-	# 	while self.lexer.at_eof():
-	# 		self.code.append(stmt())
-	# 	self.code.append(None)
+	def program(self):
+		while not self.lexer.at_eof():
+			self.code.append(self.stmt())
+		self.code.append(None)
 	
-	# def stmt(self):
-	# 	node = self.expr()
-	# 	self.lexer.expect(';')
-	# 	return node
+	def stmt(self):
+		node = self.expr()
+		self.lexer.expect(';')
+		return node
 
 	# def expr(self):
 	# 	node = self.mul()
@@ -53,8 +56,17 @@ class Parser(object):
 	# 		else:
 	# 			return node
 
+	# def expr(self):
+	# 	return self.equality()
+
 	def expr(self):
-		return self.equality()
+		return self.assign()
+
+	def assign(self):
+		node = self.equality()
+		if self.lexer.consume('='):
+			node = Node.new_node(NodeKind.ASSIGN, node, self.assign())
+		return node 
 	
 	def equality(self):
 		node = self.relational()
@@ -108,9 +120,14 @@ class Parser(object):
 		return self.primary()
 
 	def primary(self):
+		tok = self.lexer.consume_ident()
+		if tok:
+			node = Node.new_node(NodeKind.LVAR, None, None)
+			node.kind = NodeKind.LVAR
+			node.offset = (ord(tok.str) - ord('a') + 1) * 8
+			return node
 		if self.lexer.consume('('):
 			node = self.expr()
 			self.lexer.expect(')')
 			return node
 		return Node.new_node_num(self.lexer.expect_number())
-	

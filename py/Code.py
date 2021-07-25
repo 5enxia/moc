@@ -1,3 +1,4 @@
+from sys import stderr
 from Parser import NodeKind, Node
 
 class Code(object):
@@ -5,15 +6,24 @@ class Code(object):
 		self.parser = parser
 
 	def write(self):
-		node = self.parser.expr()
+		node = self.parser.program()
 
 		print('.intel_syntax noprefix')
 		print('.globl main')
 		print('main:')
 
-		Code.generate(node)
+		# alloc 26 variable
+		print('\tpush rbp')
+		print('\tmov rbp, rsp')
+		print('\tsub rsp, 208')
 
-		print('\tpop rax')
+		for code in self.parser.code:
+			if code:
+				Code.generate(code)
+				print('\tpop rax')
+
+		print('\tmov rsp, rbp')
+		print('\tpop rbp')
 		print('\tret')
 
 	@classmethod
@@ -21,7 +31,21 @@ class Code(object):
 		if node.kind == NodeKind.NUM:
 			print(f'\tpush {node.val}')
 			return
-		
+		elif node.kind == NodeKind.LVAR: 
+			Code.gen_lval(node)
+			print('\tpop rax')
+			print(f'\tmov rax, [rax]')
+			print('\tpush rax')
+			return
+		elif node.kind == NodeKind.ASSIGN: 
+			Code.gen_lval(node.lhs)
+			Code.generate(node.rhs)
+			print('\tpop rdi')
+			print('\tpop rax')
+			print('\tmov [rax], rdi')
+			print('\tpush rdi')
+			return
+
 		Code.generate(node.lhs)
 		Code.generate(node.rhs)
 
@@ -56,3 +80,15 @@ class Code(object):
 		
 		print('\tpush rax')
 
+	@classmethod
+	def gen_lval(cls, node: Node):
+		if node.kind != NodeKind.LVAR:
+			Code._error(' left value is not local variable.')
+		print('\tmov rax, rbp')
+		print(f'\tsub rax, {node.offset}')
+		print('\tpush rax')
+
+	@classmethod
+	def _error(cls, msg):
+		print(msg, file=stderr)
+		exit(1)
