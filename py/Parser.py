@@ -125,8 +125,9 @@ class Parser(object):
 			node = Node.new_node(NodeKind.LVAR, None, None)
 			node.offset = (ord(tok.str) - ord('a') + 1) * 8
 			return node
-		if self.lexer.consume('('):
+		elif self.lexer.consume('('):
 			node = self.expr()
 			self.lexer.expect(')')
 			return node
-		return Node.new_node_num(self.lexer.expect_number())
+		else:
+			return Node.new_node_num(self.lexer.expect_number())
