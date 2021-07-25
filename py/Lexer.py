@@ -97,8 +97,9 @@ class Lexer(object):
 	def consume_ident(self):
 		if self.token.kind != TokenKind.IDENT:
 			return False
+		tok = self.token
 		self.token = self.token.next
-		return True
+		return tok
 	
 	def expect(self, op):
 		if self.token.kind != TokenKind.RESERVED or self.token.len != len(op) or self.token.str != op:

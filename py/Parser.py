@@ -123,7 +123,6 @@ class Parser(object):
 		tok = self.lexer.consume_ident()
 		if tok:
 			node = Node.new_node(NodeKind.LVAR, None, None)
-			node.kind = NodeKind.LVAR
 			node.offset = (ord(tok.str) - ord('a') + 1) * 8
 			return node
 		if self.lexer.consume('('):
