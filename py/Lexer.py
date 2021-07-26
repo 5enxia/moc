@@ -54,6 +54,15 @@ class Token(object):
 		cur.next = tok
 		return tok
 
+class LVar(object):
+	local = None
+
+	def __init__(self,):
+		self.next = next_var
+		self.name = name
+		self.len =len(name) if name else 0 
+		self.offset = None
+
 class Lexer(object):
 	def __init__(self, line):
 		self.token = Lexer.tokenize(line)
