@@ -13,6 +13,7 @@ class NodeKind(Enum):
 	LE = auto()  #  <=
 	LVAR = auto() # local variable
 	ASSIGN = auto() # ident
+	RETURN = auto()
 	NUM = auto()  # integer
 
 
@@ -44,9 +45,15 @@ class Parser(object):
 		self.code.append(None)
 	
 	def stmt(self):
-		node = self.expr()
+		node = None
+
+		if self.lexer.consume('return'):
+			node = Node.new_node(NodeKind.RETURN, self.expr(), None)
+		else:
+			node = self.expr()
 		self.lexer.expect(';')
 		return node
+
 
 	# def expr(self):
 	# 	node = self.mul()

@@ -7,7 +7,7 @@ _p_operator = r'[\+\-\*\/]'
 _p_parenthesis = r'[\(\)]'
 _p_equality = r'[\=\!]\='
 _p_relational = r'[\<\>]\=?'
-_p_ident = r'[a-z]+'
+_p_ident = r'[a-zA-Z][a-zA-Z0-9\_]*'
 _p_assign = r'\='
 _p_semicolon = r'\;'
 
@@ -35,6 +35,7 @@ class TokenKind(Enum):
 	RESERVED = 0
 	IDENT = auto()
 	NUM = auto()
+	RETURN = auto()
 	EOF = auto()
 
 class Token(object):
@@ -75,6 +76,7 @@ class Lexer(object):
 	@classmethod
 	def tokenize(cls, line):
 		line = _re_all.findall(line)
+		# print(line)
 
 		head = Token(None, None, None)
 		cur = head
@@ -92,7 +94,10 @@ class Lexer(object):
 					_re_semicolon.match(line[0]):
 				cur = Token.new_token(TokenKind.RESERVED, cur, line.pop(0))
 			elif _re_ident.match(line[0]):
-				cur = Token.new_token(TokenKind.IDENT, cur, line.pop(0))
+				if line[0] == 'return':
+					cur = Token.new_token(TokenKind.RESERVED, cur, line.pop(0))
+				else:
+					cur = Token.new_token(TokenKind.IDENT, cur, line.pop(0))
 			else:	
 				Lexer._error(f'Can not tokenize {line[0]}.')
 		

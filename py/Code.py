@@ -28,7 +28,14 @@ class Code(object):
 
 	@classmethod
 	def generate(cls, node: Node):
-		if node.kind == NodeKind.NUM:
+		if node.kind == NodeKind.RETURN:
+			Code.generate(node.lhs)
+			print("\tpop rax")
+			print("\tmov rsp, rbp")
+			print("\tpop rbp")
+			print("\tret")
+			return
+		elif node.kind == NodeKind.NUM:
 			print(f'\tpush {node.val}')
 			return
 		elif node.kind == NodeKind.LVAR: 

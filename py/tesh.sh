@@ -47,6 +47,7 @@ assert() {
 # assert 0 '1>=2;'
 
 # assert 3 'a = 1; b = 2; a + b;'
-assert 3 'ab = 1; cd = 2; ab + cd;'
+# assert 3 'abc = 1; xyz = 2; abc + xyz;'
+assert 3 'a = 1; b = 2; c = a +b; return c;'
 
 echo OK
