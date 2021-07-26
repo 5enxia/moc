@@ -127,12 +127,12 @@ class Parser(object):
 			node = Node.new_node(NodeKind.LVAR, None, None)
 
 			lvar = self.lexer.find_lvar(tok)
-			print(lvar)
 			if lvar:
 				node.offset = lvar.offset
 			else:
 				lvar = LVar(self.lexer.locals, tok.str)
 				lvar.offset = self.lexer.locals.offset + 8
+				node.offset = lvar.offset
 				self.lexer.locals = lvar
 			return node
 		elif self.lexer.consume('('):
