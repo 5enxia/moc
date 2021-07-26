@@ -7,7 +7,7 @@ _p_operator = r'[\+\-\*\/]'
 _p_parenthesis = r'[\(\)]'
 _p_equality = r'[\=\!]\='
 _p_relational = r'[\<\>]\=?'
-_p_ident = r'[a-z]'
+_p_ident = r'[a-z]+'
 _p_assign = r'\='
 _p_semicolon = r'\;'
 
@@ -55,17 +55,16 @@ class Token(object):
 		return tok
 
 class LVar(object):
-	local = None
-
-	def __init__(self,):
-		self.next = next_var
+	def __init__(self, next_lvar, name):
+		self.next = next_lvar
 		self.name = name
-		self.len =len(name) if name else 0 
-		self.offset = None
+		self.len = len(name) if name else 0 
+		self.offset = 0
 
 class Lexer(object):
 	def __init__(self, line):
 		self.token = Lexer.tokenize(line)
+		self.locals = LVar(None, '')
 
 	def __str__(self):
 		return self.token.str 
@@ -129,3 +128,14 @@ class Lexer(object):
 	def _error(cls, msg):
 		print(msg, file=stderr)
 		exit(1)
+
+	def find_lvar(self, tok):
+		var: LVar = self.locals
+		while True:
+			if var:
+				if var.len == tok.len and var.name == tok.str:
+					return var
+				else:
+					var = var.next
+			else:
+				return None

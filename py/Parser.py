@@ -1,5 +1,7 @@
 from enum import Enum, auto
 
+from Lexer import LVar
+
 class NodeKind(Enum):
 	ADD = 0  # +
 	SUB = auto()  # -
@@ -123,7 +125,17 @@ class Parser(object):
 		tok = self.lexer.consume_ident()
 		if tok:
 			node = Node.new_node(NodeKind.LVAR, None, None)
-			node.offset = (ord(tok.str) - ord('a') + 1) * 8
+
+			lvar = self.lexer.find_lvar(tok)
+			if lvar:
+				node.offset = lvar.offset
+			else:
+				lvar = LVar(self.lexer.locals, tok.str)
+				if self.lexer.locals.offset == 0:
+					lvar.offset = 0
+				else:
+					lvar.offset = self.lexer.locals.offset + 8
+				self.lexer.locals = lvar
 			return node
 		elif self.lexer.consume('('):
 			node = self.expr()
